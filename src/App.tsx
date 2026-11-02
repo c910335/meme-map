@@ -39,7 +39,7 @@ export const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<MemeCategory | 'all'>('all');
   const [selectedRegion, setSelectedRegion] = useState('all');
-  const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('oldest');
   const [tileTheme, setTileTheme] = useState<'dark' | 'light' | 'satellite'>('dark');
   const [resetViewTrigger, setResetViewTrigger] = useState(0);
 

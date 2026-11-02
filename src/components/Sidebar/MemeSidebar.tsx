@@ -162,7 +162,7 @@ export const MemeSidebar: React.FC<MemeSidebarProps> = ({
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors ${
-                showFilters || selectedRegion !== 'all' || sortBy !== 'newest'
+                showFilters || selectedRegion !== 'all' || sortBy !== 'oldest'
                   ? 'text-cyan-400 font-semibold'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
@@ -212,6 +212,16 @@ export const MemeSidebar: React.FC<MemeSidebarProps> = ({
                 </span>
                 <div className="flex items-center gap-1.5">
                   <button
+                    onClick={() => onSortChange('oldest')}
+                    className={`px-2.5 py-1 rounded-md text-xs transition-all ${
+                      sortBy === 'oldest'
+                        ? 'bg-slate-700 text-white font-medium border border-slate-600'
+                        : 'bg-slate-800/40 text-slate-400 hover:text-slate-200 border border-slate-800'
+                    }`}
+                  >
+                    ⏳ 年份舊到新
+                  </button>
+                  <button
                     onClick={() => onSortChange('newest')}
                     className={`px-2.5 py-1 rounded-md text-xs transition-all ${
                       sortBy === 'newest'
@@ -220,16 +230,6 @@ export const MemeSidebar: React.FC<MemeSidebarProps> = ({
                     }`}
                   >
                     ✨ 年份新到舊
-                  </button>
-                  <button
-                    onClick={() => onSortChange('oldest')}
-                    className={`px-2.5 py-1 rounded-md text-xs transition-all ${
-                      sortBy === 'oldest'
-                        ? 'bg-slate-700 text-white font-medium border border-slate-600'
-                        : 'bg-slate-800/40 text-slate-400 hover:text-slate-200 border border-slate-800'
-                    }`}
-                  >
-                    📜 經典元老
                   </button>
                 </div>
               </div>
