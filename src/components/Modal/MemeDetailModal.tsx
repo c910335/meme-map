@@ -12,7 +12,6 @@ import {
   Sparkles, 
   ShieldAlert, 
   BookOpen, 
-  Flame,
   CheckCircle2
 } from 'lucide-react';
 import { MemeItem } from '../../types/meme';
@@ -80,11 +79,6 @@ export const MemeDetailModal: React.FC<MemeDetailModalProps> = ({ meme, onClose 
               <span className="inline-flex items-center gap-1 text-xs font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">
                 <Calendar className="w-3 h-3 text-slate-400" />
                 {meme.year} 年
-              </span>
-
-              <span className="inline-flex items-center gap-1 text-xs font-mono text-amber-400 bg-amber-950/40 px-2 py-0.5 rounded-md border border-amber-800/40">
-                <Flame className="w-3 h-3 text-amber-400" />
-                熱門度 {meme.popularityScore}/100
               </span>
             </div>
 

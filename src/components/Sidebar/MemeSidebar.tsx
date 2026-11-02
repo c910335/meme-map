@@ -28,8 +28,8 @@ interface MemeSidebarProps {
   onSearchChange: (query: string) => void;
   selectedRegion: string;
   onSelectRegion: (region: string) => void;
-  sortBy: 'popularity' | 'newest' | 'oldest';
-  onSortChange: (sort: 'popularity' | 'newest' | 'oldest') => void;
+  sortBy: 'newest' | 'oldest';
+  onSortChange: (sort: 'newest' | 'oldest') => void;
   onRandomTeleport: () => void;
   isOpen: boolean;
   onToggleOpen: () => void;
@@ -162,7 +162,7 @@ export const MemeSidebar: React.FC<MemeSidebarProps> = ({
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors ${
-                showFilters || selectedRegion !== 'all' || sortBy !== 'popularity'
+                showFilters || selectedRegion !== 'all' || sortBy !== 'newest'
                   ? 'text-cyan-400 font-semibold'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
@@ -212,18 +212,8 @@ export const MemeSidebar: React.FC<MemeSidebarProps> = ({
                 </span>
                 <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => onSortChange('popularity')}
-                    className={`px-2 py-1 rounded-md text-xs transition-all ${
-                      sortBy === 'popularity'
-                        ? 'bg-slate-700 text-white font-medium border border-slate-600'
-                        : 'bg-slate-800/40 text-slate-400 hover:text-slate-200 border border-slate-800'
-                    }`}
-                  >
-                    🔥 熱門指數
-                  </button>
-                  <button
                     onClick={() => onSortChange('newest')}
-                    className={`px-2 py-1 rounded-md text-xs transition-all ${
+                    className={`px-2.5 py-1 rounded-md text-xs transition-all ${
                       sortBy === 'newest'
                         ? 'bg-slate-700 text-white font-medium border border-slate-600'
                         : 'bg-slate-800/40 text-slate-400 hover:text-slate-200 border border-slate-800'
@@ -233,7 +223,7 @@ export const MemeSidebar: React.FC<MemeSidebarProps> = ({
                   </button>
                   <button
                     onClick={() => onSortChange('oldest')}
-                    className={`px-2 py-1 rounded-md text-xs transition-all ${
+                    className={`px-2.5 py-1 rounded-md text-xs transition-all ${
                       sortBy === 'oldest'
                         ? 'bg-slate-700 text-white font-medium border border-slate-600'
                         : 'bg-slate-800/40 text-slate-400 hover:text-slate-200 border border-slate-800'
@@ -303,10 +293,6 @@ export const MemeSidebar: React.FC<MemeSidebarProps> = ({
                       <span className="text-[11px] font-mono text-slate-400">
                         {meme.year} 年
                       </span>
-                    </div>
-
-                    <div className="flex items-center gap-1 text-[10px] text-amber-400/90 font-mono">
-                      <span>🔥 {meme.popularityScore}</span>
                     </div>
                   </div>
 

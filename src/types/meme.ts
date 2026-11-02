@@ -25,7 +25,7 @@ export interface MemeItem {
   sourceUrl?: string;
   sourceLabel?: string;
   iconName?: string;
-  popularityScore: number; // 1-100
+  popularityScore?: number; // 1-100 (可選)
   imagePlaceholder?: string;
   gmapQuery?: string; // 專屬 Google Map 搜尋地標名稱或無括號純淨門牌地址
 }

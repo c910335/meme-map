@@ -39,7 +39,7 @@ export const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<MemeCategory | 'all'>('all');
   const [selectedRegion, setSelectedRegion] = useState('all');
-  const [sortBy, setSortBy] = useState<'popularity' | 'newest' | 'oldest'>('popularity');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
   const [tileTheme, setTileTheme] = useState<'dark' | 'light' | 'satellite'>('dark');
   const [resetViewTrigger, setResetViewTrigger] = useState(0);
 
@@ -100,9 +100,8 @@ export const App: React.FC = () => {
         return true;
       })
       .sort((a, b) => {
-        if (sortBy === 'newest') return b.year - a.year;
         if (sortBy === 'oldest') return a.year - b.year;
-        return b.popularityScore - a.popularityScore;
+        return b.year - a.year;
       });
   }, [allMemes, selectedCategory, selectedRegion, searchQuery, sortBy]);
 
