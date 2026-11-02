@@ -72,6 +72,34 @@ export const MemeMap: React.FC<MemeMapProps> = ({
   const tileLayerRef = useRef<L.TileLayer | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
   const popupTimeoutRef = useRef<number | null>(null);
+  const onOpenModalRef = useRef(onOpenModal);
+  onOpenModalRef.current = onOpenModal;
+  const memesRef = useRef(memes);
+  memesRef.current = memes;
+
+  // Global event delegation in capture phase to guarantee 迷因百科 buttons always respond immediately
+  useEffect(() => {
+    const handleDetailClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      const btn = target?.closest<HTMLButtonElement>('[data-action="open-modal"]');
+      if (btn) {
+        e.stopPropagation();
+        e.preventDefault();
+        const memeId = btn.getAttribute('data-meme-id');
+        if (memeId) {
+          const found = memesRef.current.find((m) => m.id === memeId);
+          if (found) {
+            onOpenModalRef.current(found);
+          }
+        }
+      }
+    };
+
+    document.addEventListener('click', handleDetailClick, true);
+    return () => {
+      document.removeEventListener('click', handleDetailClick, true);
+    };
+  }, []);
 
   // Initialize Map
   useEffect(() => {
@@ -214,7 +242,10 @@ export const MemeMap: React.FC<MemeMapProps> = ({
           <div class="flex items-center gap-1.5 pt-2 border-t border-slate-700/60">
             <button 
               id="popup-btn-detail-${meme.id}" 
-              class="flex-1 text-center py-1.5 px-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-medium transition-all"
+              data-action="open-modal"
+              data-meme-id="${meme.id}"
+              type="button"
+              class="flex-1 text-center py-1.5 px-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 active:bg-cyan-500/40 border border-cyan-500/40 text-cyan-300 text-xs font-medium transition-all cursor-pointer active:scale-95"
             >
               迷因百科
             </button>
@@ -281,7 +312,11 @@ export const MemeMap: React.FC<MemeMapProps> = ({
       easeLinearity: 0.25,
     });
 
-    if (marker) {
+    // If the marker popup is not already open (e.g. triggered via sidebar or teleport),
+    // open it after the flyTo animation completes.
+    // If the user clicked the marker directly on the map, it is already open; do not re-open,
+    // which would destroy the popup DOM element and lose event state.
+    if (marker && !marker.isPopupOpen()) {
       popupTimeoutRef.current = window.setTimeout(() => {
         marker.openPopup();
       }, 600);
