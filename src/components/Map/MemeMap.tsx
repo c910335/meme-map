@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MemeItem } from '../../types/meme';
 import { CATEGORIES, getGoogleMapsPlaceUrl, getGoogleMapsDirUrl } from '../../data/memes';
+import { calculateDistanceKm, formatDistance } from '../../utils/geo';
 
 interface MemeMapProps {
   memes: MemeItem[];
@@ -11,6 +12,7 @@ interface MemeMapProps {
   onOpenModal: (meme: MemeItem) => void;
   tileTheme: 'dark' | 'light' | 'satellite';
   resetViewTrigger?: number;
+  userLocation?: [number, number] | null;
 }
 
 const TILE_CONFIGS: Record<'dark' | 'light' | 'satellite', {
@@ -66,11 +68,13 @@ export const MemeMap: React.FC<MemeMapProps> = ({
   onOpenModal,
   tileTheme,
   resetViewTrigger,
+  userLocation,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  const userMarkerRef = useRef<L.Marker | null>(null);
   const popupTimeoutRef = useRef<number | null>(null);
   const onOpenModalRef = useRef(onOpenModal);
   onOpenModalRef.current = onOpenModal;
@@ -210,6 +214,12 @@ export const MemeMap: React.FC<MemeMapProps> = ({
       const marker = L.marker(meme.coordinates, { icon: customIcon });
       const placeUrl = getGoogleMapsPlaceUrl(meme);
       const dirUrl = getGoogleMapsDirUrl(meme);
+      const distanceBadgeHtml = userLocation
+        ? `<span class="inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 shadow-sm ml-auto">
+             <svg class="w-2.5 h-2.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+             ${formatDistance(calculateDistanceKm(userLocation, meme.coordinates))}
+           </span>`
+        : '';
 
       // Popup Content HTML
       const popupHtml = `
@@ -220,6 +230,7 @@ export const MemeMap: React.FC<MemeMapProps> = ({
               ${category.label}
             </span>
             <span class="text-[11px] font-mono text-slate-400 font-medium">${meme.year} 年</span>
+            ${distanceBadgeHtml}
           </div>
 
           <h3 class="text-sm font-bold text-white leading-tight mb-1 pr-6">
@@ -294,7 +305,65 @@ export const MemeMap: React.FC<MemeMapProps> = ({
       marker.addTo(map);
       markersRef.current.set(meme.id, marker);
     });
-  }, [memes]);
+  }, [memes, userLocation]);
+
+  // Manage User Location Marker (Pulsing Radar Dot on Map)
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    if (userMarkerRef.current) {
+      userMarkerRef.current.remove();
+      userMarkerRef.current = null;
+    }
+
+    if (!userLocation) return;
+
+    const userIconHtml = `
+      <div class="relative flex items-center justify-center w-8 h-8 pointer-events-auto">
+        <span class="absolute w-8 h-8 rounded-full bg-cyan-400/30 animate-ping"></span>
+        <span class="absolute w-6 h-6 rounded-full bg-cyan-500/20"></span>
+        <span class="relative w-4 h-4 rounded-full bg-cyan-400 border-2 border-white shadow-lg shadow-cyan-500/50"></span>
+      </div>
+    `;
+
+    const userIcon = L.divIcon({
+      className: 'user-location-custom-icon',
+      html: userIconHtml,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+      popupAnchor: [0, -16],
+    });
+
+    const userMarker = L.marker(userLocation, {
+      icon: userIcon,
+      zIndexOffset: 1500,
+    });
+
+    const userPopupHtml = `
+      <div class="p-2.5 text-xs text-slate-100 font-sans text-center">
+        <div class="font-bold text-cyan-400 mb-0.5 flex items-center justify-center gap-1">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+          你的目前位置
+        </div>
+        <div class="text-[11px] text-slate-400">以此為基準探測全台最近迷因</div>
+      </div>
+    `;
+
+    userMarker.bindPopup(userPopupHtml, {
+      closeButton: false,
+    });
+
+    userMarker.addTo(map);
+    userMarkerRef.current = userMarker;
+
+    return () => {
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove();
+        userMarkerRef.current = null;
+      }
+    };
+  }, [userLocation]);
 
   // Handle selectedMeme pan & popup
   useEffect(() => {

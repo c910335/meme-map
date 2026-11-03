@@ -214,6 +214,21 @@ async function runTest() {
       console.log('✅ Close button and Year element DO NOT overlap! Clean separation verified.');
     }
 
+    // 12. Test GPS Nearest Meme Radar feature
+    console.log('👉 Testing GPS Nearest Meme Radar...');
+    await page.context().grantPermissions(['geolocation']);
+    await page.context().setGeolocation({ latitude: 25.0477, longitude: 121.5170 }); // Taipei Main Station
+    const radarBtn = await page.waitForSelector('header button:has-text("離我最近")');
+    await radarBtn.click();
+    await page.waitForTimeout(1000);
+    const notice = await page.waitForSelector('[data-testid="location-notice"]');
+    const noticeText = await notice.innerText();
+    console.log(`✅ GPS Radar locked! Notice: ${noticeText}`);
+    const userMarker = await page.waitForSelector('.user-location-custom-icon');
+    console.log('✅ User pulsing location marker rendered on map');
+    const gpsBanner = await page.waitForSelector('text=GPS 雷達已鎖定');
+    console.log('✅ GPS sorting banner active in sidebar');
+
     // Take screenshot with popup open
     const screenshotPath = '/home/tatsujin/Workspace/web/meme_map/verification_screenshot.png';
     await page.screenshot({ path: screenshotPath, fullPage: true });

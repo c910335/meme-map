@@ -16,13 +16,15 @@ import {
 } from 'lucide-react';
 import { MemeItem } from '../../types/meme';
 import { CATEGORIES, getGoogleMapsPlaceUrl, getGoogleMapsDirUrl } from '../../data/memes';
+import { calculateDistanceKm, formatDistance } from '../../utils/geo';
 
 interface MemeDetailModalProps {
   meme: MemeItem | null;
   onClose: () => void;
+  userLocation?: [number, number] | null;
 }
 
-export const MemeDetailModal: React.FC<MemeDetailModalProps> = ({ meme, onClose }) => {
+export const MemeDetailModal: React.FC<MemeDetailModalProps> = ({ meme, onClose, userLocation }) => {
   const [copiedCoords, setCopiedCoords] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -147,6 +149,13 @@ export const MemeDetailModal: React.FC<MemeDetailModalProps> = ({ meme, onClose 
                     <span>{copiedCoords ? '已複製' : '複製座標'}</span>
                   </button>
                 </div>
+
+                {userLocation && (
+                  <div className="flex items-center gap-1.5 mt-2 text-xs text-cyan-300 font-medium bg-cyan-950/70 border border-cyan-800/60 px-2.5 py-1 rounded-lg w-fit">
+                    <Navigation className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span>距離您目前位置約 <strong className="text-white font-mono">{formatDistance(calculateDistanceKm(userLocation, meme.coordinates))}</strong></span>
+                  </div>
+                )}
               </div>
             </div>
 

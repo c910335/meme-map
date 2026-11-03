@@ -12,10 +12,14 @@ import {
   Compass,
   Flame,
   ChevronRight,
-  Menu
+  Menu,
+  Navigation,
+  Radar,
+  Loader2
 } from 'lucide-react';
 import { MemeItem, MemeCategory } from '../../types/meme';
 import { CATEGORIES } from '../../data/memes';
+import { calculateDistanceKm, formatDistance } from '../../utils/geo';
 
 interface MemeSidebarProps {
   memes: MemeItem[];
@@ -28,11 +32,15 @@ interface MemeSidebarProps {
   onSearchChange: (query: string) => void;
   selectedRegion: string;
   onSelectRegion: (region: string) => void;
-  sortBy: 'newest' | 'oldest';
-  onSortChange: (sort: 'newest' | 'oldest') => void;
+  sortBy: 'newest' | 'oldest' | 'nearest';
+  onSortChange: (sort: 'newest' | 'oldest' | 'nearest') => void;
   onRandomTeleport: () => void;
   isOpen: boolean;
   onToggleOpen: () => void;
+  userLocation: [number, number] | null;
+  isLocating: boolean;
+  onLocateNearest: () => void;
+  onClearLocation: () => void;
 }
 
 const REGIONS: { id: string; label: string; cities: string[] }[] = [
@@ -70,6 +78,10 @@ export const MemeSidebar: React.FC<MemeSidebarProps> = ({
   onRandomTeleport,
   isOpen,
   onToggleOpen,
+  userLocation,
+  isLocating,
+  onLocateNearest,
+  onClearLocation,
 }) => {
   const [showFilters, setShowFilters] = useState(false);
 
@@ -210,7 +222,7 @@ export const MemeSidebar: React.FC<MemeSidebarProps> = ({
                 <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
                   排序方式
                 </span>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <button
                     onClick={() => onSortChange('oldest')}
                     className={`px-2.5 py-1 rounded-md text-xs transition-all ${
@@ -231,11 +243,53 @@ export const MemeSidebar: React.FC<MemeSidebarProps> = ({
                   >
                     ✨ 年份新到舊
                   </button>
+                  <button
+                    onClick={() => {
+                      if (!userLocation) {
+                        onLocateNearest();
+                      } else {
+                        onSortChange('nearest');
+                      }
+                    }}
+                    disabled={isLocating}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs transition-all ${
+                      sortBy === 'nearest'
+                        ? 'bg-cyan-600/30 text-cyan-300 font-medium border border-cyan-500/60 shadow-sm'
+                        : 'bg-slate-800/40 text-slate-400 hover:text-cyan-300 border border-slate-800'
+                    }`}
+                    title={userLocation ? '依離你目前位置由近到遠排序' : '啟用 GPS 定位並依距離排序'}
+                  >
+                    {isLocating ? (
+                      <Loader2 className="w-3 h-3 text-cyan-400 animate-spin" />
+                    ) : (
+                      <Radar className="w-3 h-3 text-cyan-400" />
+                    )}
+                    <span>🛰️ 離我最近{userLocation ? '' : ' (需定位)'}</span>
+                  </button>
                 </div>
               </div>
             </div>
           )}
         </div>
+
+        {/* Active GPS Banner if userLocation is available */}
+        {userLocation && (
+          <div className="mx-3 mt-2.5 px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-950/60 to-slate-900/80 border border-cyan-800/60 flex items-center justify-between text-xs text-cyan-300 shadow-md shrink-0 animate-in fade-in duration-200">
+            <div className="flex items-center gap-2 truncate">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+              </span>
+              <span className="truncate font-medium">GPS 雷達已鎖定 · 距離由近到遠</span>
+            </div>
+            <button
+              onClick={onClearLocation}
+              className="text-[11px] text-slate-400 hover:text-cyan-200 underline shrink-0 ml-2 cursor-pointer transition-colors"
+            >
+              解除定位
+            </button>
+          </div>
+        )}
 
         {/* Meme List Header */}
         <div className="px-4 py-2 bg-slate-900/40 border-b border-slate-800/40 flex items-center justify-between text-xs text-slate-400 shrink-0">
@@ -276,7 +330,7 @@ export const MemeSidebar: React.FC<MemeSidebarProps> = ({
                       : 'bg-slate-900/60 hover:bg-slate-800/60 border-slate-800/80 hover:border-slate-700'
                   }`}
                 >
-                  {/* Category Pill & Year */}
+                  {/* Category Pill & Year & Distance */}
                   <div className="flex items-center justify-between gap-2 mb-1.5">
                     <div className="flex items-center gap-1.5">
                       <span
@@ -294,6 +348,16 @@ export const MemeSidebar: React.FC<MemeSidebarProps> = ({
                         {meme.year} 年
                       </span>
                     </div>
+
+                    {userLocation && (
+                      <span 
+                        className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 shadow-sm shrink-0"
+                        title={`距離您約 ${formatDistance(calculateDistanceKm(userLocation, meme.coordinates))}`}
+                      >
+                        <Navigation className="w-2.5 h-2.5 text-cyan-400" />
+                        <span>{formatDistance(calculateDistanceKm(userLocation, meme.coordinates))}</span>
+                      </span>
+                    )}
                   </div>
 
                   {/* Title */}

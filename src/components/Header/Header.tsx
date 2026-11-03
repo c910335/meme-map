@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Dice5, PlusCircle, Info, Layers } from 'lucide-react';
+import { Sparkles, Dice5, PlusCircle, Info, Layers, Radar, Loader2 } from 'lucide-react';
 import { MemeCategory } from '../../types/meme';
 
 interface HeaderProps {
@@ -12,6 +12,10 @@ interface HeaderProps {
   tileTheme: 'dark' | 'light' | 'satellite';
   onToggleTileTheme: () => void;
   selectedCategory: MemeCategory | 'all';
+  userLocation: [number, number] | null;
+  isLocating: boolean;
+  onLocateNearest: () => void;
+  onClearLocation: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -23,6 +27,10 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSubmit,
   tileTheme,
   onToggleTileTheme,
+  userLocation,
+  isLocating,
+  onLocateNearest,
+  onClearLocation,
 }) => {
   return (
     <header className="relative z-30 flex items-center justify-between px-4 py-3 bg-[#0f172a]/95 backdrop-blur-md border-b border-slate-800/80 shadow-lg text-slate-100 select-none">
@@ -58,6 +66,36 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right: Actions */}
       <div className="flex items-center gap-2">
+        {/* Nearest Meme GPS Radar Button */}
+        <button
+          onClick={userLocation ? onClearLocation : onLocateNearest}
+          disabled={isLocating}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium shadow-sm transition-all active:scale-95 group border ${
+            userLocation
+              ? 'bg-cyan-500/20 hover:bg-cyan-500/30 border-cyan-500/50 text-cyan-300'
+              : isLocating
+              ? 'bg-slate-800 border-slate-700 text-slate-400 cursor-wait'
+              : 'bg-gradient-to-r from-cyan-600/20 to-sky-600/20 hover:from-cyan-600/30 hover:to-sky-600/30 border-cyan-500/40 text-cyan-300 hover:text-cyan-200'
+          }`}
+          title={
+            userLocation
+              ? '目前已啟用 GPS 定位（點擊重設）'
+              : '以 GPS 探測離你目前位置最近的迷因地標'
+          }
+        >
+          {isLocating ? (
+            <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
+          ) : (
+            <Radar className={`w-4 h-4 text-cyan-400 ${userLocation ? 'animate-pulse' : 'group-hover:rotate-45'} transition-transform`} />
+          )}
+          <span className="hidden sm:inline">
+            {isLocating ? '探測中...' : userLocation ? '離我最近 (已定位)' : '離我最近'}
+          </span>
+          <span className="sm:hidden">
+            {isLocating ? '探測' : userLocation ? '已定位' : '最近'}
+          </span>
+        </button>
+
         {/* Random Teleport Button */}
         <button
           onClick={onRandomTeleport}
