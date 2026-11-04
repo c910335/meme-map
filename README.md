@@ -51,19 +51,19 @@
 
 ---
 
-## 🛠️ 技術棧 (Tech Stack)
+## 🛠️ 技術架構 (Tech Stack)
 
 * **核心框架**：[React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
 * **建置工具**：[Vite 6](https://vitejs.dev/)
 * **樣式設計**：[Tailwind CSS 3](https://tailwindcss.com/) + 毛玻璃質感 Glassmorphism UI
 * **地圖渲染**：[Leaflet 1.9](https://leafletjs.com/) + [React-Leaflet](https://react-leaflet.js.org/) + 自訂 HTML/SVG Marker
-* **圖標組件**：[Lucide React](https://lucide.dev/)
-* **自動化測試**：[Playwright](https://playwright.dev/)（包含地圖載入、圖層切換、Modal 交互、座標連動與響應式排版驗證）
+* **圖示元件**：[Lucide React](https://lucide.dev/)
+* **自動化測試**：[Playwright](https://playwright.dev/)（包含地圖載入、圖層切換、Modal 互動、座標連動與響應式排版驗證）
 * **CI/CD 自動部署**：[GitHub Actions](https://github.com/features/actions) 部署至 GitHub Pages
 
 ---
 
-## 🚀 本地開發與建置 (Getting Started)
+## 🚀 本機開發與建置 (Getting Started)
 
 ### 系統需求
 * Node.js `>= 20.0.0`
@@ -86,7 +86,7 @@ npm run dev
 ```
 啟動後於瀏覽器開啟 `http://localhost:5173`。
 
-### 4. 執行生產建置
+### 4. 執行 Production 正式建置
 ```bash
 npm run build
 ```

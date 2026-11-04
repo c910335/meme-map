@@ -78,7 +78,7 @@ export const SubmitMemeModal: React.FC<SubmitMemeModalProps> = ({
               <span>投稿審核必備資訊提醒</span>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              為了確保地圖標記的真實性與精確定位，提交新地標時請<strong className="text-amber-200">務必至少提供以下兩項關鍵連結</strong>：
+              為了確保地標資訊的真實性與精確定位，提交新地標時請<strong className="text-amber-200">務必至少提供以下兩項關鍵連結</strong>：
             </p>
             <ul className="text-xs text-slate-200 space-y-1 list-disc pl-4 font-medium">
               <li><strong className="text-white">原始出處連結：</strong>YouTube 原片、新聞影音、社群貼文或影片連結</li>
