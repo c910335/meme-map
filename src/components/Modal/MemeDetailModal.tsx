@@ -17,6 +17,7 @@ import {
 import { MemeItem } from '../../types/meme';
 import { CATEGORIES, getGoogleMapsPlaceUrl, getGoogleMapsDirUrl } from '../../data/memes';
 import { calculateDistanceKm, formatDistance } from '../../utils/geo';
+import { copyToClipboard } from '../../utils/clipboard';
 
 interface MemeDetailModalProps {
   meme: MemeItem | null;
@@ -34,22 +35,33 @@ export const MemeDetailModal: React.FC<MemeDetailModalProps> = ({ meme, onClose,
   const googleMapsPlaceUrl = getGoogleMapsPlaceUrl(meme);
   const googleMapsDirUrl = getGoogleMapsDirUrl(meme);
 
-  const handleCopyCoords = () => {
-    navigator.clipboard.writeText(`${meme.coordinates[0]}, ${meme.coordinates[1]}`);
-    setCopiedCoords(true);
-    setTimeout(() => setCopiedCoords(false), 2000);
+  const handleCopyCoords = async () => {
+    const success = await copyToClipboard(`${meme.coordinates[0]}, ${meme.coordinates[1]}`);
+    if (success) {
+      setCopiedCoords(true);
+      setTimeout(() => setCopiedCoords(false), 2000);
+    }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const shareUrl = `${window.location.origin}${window.location.pathname}#meme-${meme.id}`;
-    if (navigator.share) {
-      navigator.share({
-        title: `${meme.title} - 台灣迷因地圖`,
-        text: `【台灣迷因地圖】${meme.title}：「${meme.quotes[0]}」朝聖指南`,
-        url: shareUrl,
-      }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(shareUrl);
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: `${meme.title} - 台灣迷因地圖`,
+          text: `【台灣迷因地圖】${meme.title}：「${meme.quotes[0]}」朝聖指南`,
+          url: shareUrl,
+        });
+        return;
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
+      }
+    }
+
+    const success = await copyToClipboard(shareUrl);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }
@@ -92,12 +104,24 @@ export const MemeDetailModal: React.FC<MemeDetailModalProps> = ({ meme, onClose,
             </p>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleShare}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-700/60 text-cyan-300 hover:text-cyan-100 text-xs font-semibold transition-all active:scale-95 shadow-sm"
+              title="分享此迷因"
+            >
+              {copiedLink ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <Share2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+              <span>{copiedLink ? '已複製' : '分享'}</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+              title="關閉"
+              aria-label="關閉"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Modal Content */}
@@ -232,32 +256,35 @@ export const MemeDetailModal: React.FC<MemeDetailModalProps> = ({ meme, onClose,
         </div>
 
         {/* Modal Footer Bar */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900/80 flex items-center justify-between gap-3 text-xs">
-          {meme.sourceUrl ? (
-            <a
-              href={meme.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-medium hover:underline"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span>{meme.sourceLabel || '出處原始影片/新聞'}</span>
-            </a>
-          ) : (
-            <span className="text-slate-500">來源：社群公開資訊查證</span>
-          )}
+        <div className="p-3.5 sm:p-4 border-t border-slate-800 bg-slate-900/90 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+          <div className="min-w-0 flex-1">
+            {meme.sourceUrl ? (
+              <a
+                href={meme.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-medium hover:underline max-w-full group"
+                title={meme.sourceLabel || '出處原始影片/新聞'}
+              >
+                <ExternalLink className="w-3.5 h-3.5 shrink-0 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <span className="truncate">{meme.sourceLabel || '出處原始影片/新聞'}</span>
+              </a>
+            ) : (
+              <span className="text-slate-500">來源：社群公開資訊查證</span>
+            )}
+          </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto w-full sm:w-auto">
             <button
               onClick={handleShare}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition-colors"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600/20 to-sky-600/20 hover:from-cyan-600/35 hover:to-sky-600/35 border border-cyan-500/40 text-cyan-200 hover:text-white font-medium whitespace-nowrap active:scale-95 transition-all shadow-sm"
             >
-              {copiedLink ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5 text-slate-400" />}
-              <span>{copiedLink ? '已複製分享連結' : '分享此迷因'}</span>
+              {copiedLink ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <Share2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+              <span>{copiedLink ? '已複製連結' : '分享此迷因'}</span>
             </button>
             <button
               onClick={onClose}
-              className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+              className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-medium whitespace-nowrap active:scale-95 transition-all"
             >
               關閉
             </button>

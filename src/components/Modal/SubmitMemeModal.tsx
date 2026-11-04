@@ -11,6 +11,7 @@ import {
   FileText
 } from 'lucide-react';
 import { MemeItem } from '../../types/meme';
+import { copyToClipboard } from '../../utils/clipboard';
 
 interface SubmitMemeModalProps {
   isOpen: boolean;
@@ -35,12 +36,12 @@ export const SubmitMemeModal: React.FC<SubmitMemeModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleCopyTemplate = () => {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(SUBMISSION_TEMPLATE).catch(() => {});
+  const handleCopyTemplate = async () => {
+    const success = await copyToClipboard(SUBMISSION_TEMPLATE);
+    if (success) {
+      setCopiedTemplate(true);
+      setTimeout(() => setCopiedTemplate(false), 2500);
     }
-    setCopiedTemplate(true);
-    setTimeout(() => setCopiedTemplate(false), 2500);
   };
 
   return (
