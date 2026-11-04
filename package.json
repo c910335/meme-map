@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "node test_meme_map.mjs",
+    "test:gmap": "node test_all_memes_gmap.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

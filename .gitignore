@@ -17,6 +17,10 @@ dist-ssr
 scratch/
 .venv/
 verification_screenshot.png
+scratch_gmap_audit_results.json
+test_council.mjs
+test_problematic.mjs
+test_user_points.mjs
 
 # Editor directories and files
 .vscode/*
